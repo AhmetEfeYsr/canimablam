@@ -37,11 +37,6 @@
             min-height: 100vh;
         }
 
-        /* * NOT: ID (#karakter) -> SINIF (.karakter) olarak düzeltildi.
-         * JS kodumuz '.karakter' sınıfına sahip elementler oluşturduğu için bu gereklidir.
-         * JS, boyut ve resim gibi stilleri dinamik olarak ezer,
-         * ancak 'transition' gibi stiller buradan alınır.
-        */
         .karakter {
             width: 100px;
             height: 120px;
@@ -53,9 +48,8 @@
             top: -150px;
             left: -150px;
             opacity: 0;
-            z-index: 10; /* Bu, JS tarafından (20 olarak) ezilecektir */
-            transition: opacity 0.3s ease; /* Bu stil önemlidir */
-            /* Performans optimizasyonu */
+            z-index: 10; 
+            transition: opacity 0.3s ease; 
             will-change: transform;
             transform: translateZ(0);
         }
@@ -99,33 +93,17 @@
         // =================================================================
         const AYARLAR = {
             // --- KICK AYARLARI ---
-
-            // !!! ÖNEMLİ: Buraya bağlanılacak sohbet odasının ID'sini manuel girin !!!
             kickChatroomID: 24986517, 
-
-            // Kick sohbet URL'si (Değişirse buradan güncelleyin)
             kickWebSocketUrl: "wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=7.6.0&flash=false", 
-
             // --- YETKİLİ AYARLARI ---
             yetkiliListesi: ["pairaaa", "youarerightpaira", "himilayk"],
-            topluAtlamaGecikmesi: 100, // Yarım saniye
-
+            topluAtlamaGecikmesi: 100, 
             // --- KARAKTER GRUPLARI ---
             ozelKarakterGruplari: {
-                'grup1': {
-                    resim: '1.png',
-                    kullanicilar: ['kullanici1', 'kullanici2', 'testuser']
-                },
-                'grup2': {
-                    resim: '2.png',
-                    kullanicilar: ['baska_biri', 'deneme']
-                },
-                'grup3': {
-                    resim: '3.png',
-                    kullanicilar: []
-                }
+                'grup1': { resim: '1.png', kullanicilar: ['kullanici1', 'kullanici2', 'testuser'] },
+                'grup2': { resim: '2.png', kullanicilar: ['baska_biri', 'deneme'] },
+                'grup3': { resim: '3.png', kullanicilar: [] }
             },
-
             // --- DİĞER AYARLAR ---
             testModu: false,
             fizik: {
@@ -146,7 +124,6 @@
         // === AYAR KUTUSU SONU ===
         // =================================================================
 
-        // --- Ekran ve Ölçeklendirme Ayarları ---
         let ekranGenisligi = Math.max(window.innerWidth, document.documentElement.clientWidth) || 1920; 
         let ekranYuksekligi = Math.max(window.innerHeight, document.documentElement.clientHeight) || 1080;
         console.log(`📏 Ekran boyutları algılandı: ${ekranGenisligi}x${ekranYuksekligi}`);
@@ -160,7 +137,6 @@
         document.body.style.imageRendering = '-webkit-optimize-contrast';
         console.log('🎥 OBS optimizasyonu aktif');
 
-        // --- Global Değişkenler ---
         let havuzGizli = false;
         let havuzGizlemeTimer = null;
         let atlayanKullanicilar = new Set();
@@ -170,7 +146,6 @@
         let topluAtlamaAktif = false;
         let atlamaSirasi = [];
 
-        // --- En Yüksek Skor Göstergesi ---
         const skorGosterici = document.createElement('div');
         skorGosterici.id = 'skor-gosterici';
         skorGosterici.style.position = 'fixed';
@@ -186,7 +161,6 @@
         skorGosterici.textContent = 'En Yüksek Skor: Henüz yok';
         document.body.appendChild(skorGosterici);
 
-        // --- Havuz Fonksiyonları ---
         function rastgeleHavuzKonumu() {
             const guncelGenislik = Math.max(window.innerWidth, document.documentElement.clientWidth) || 1920;
             const havuzGenisligi = Math.round(298 * ortalamaOran);
@@ -214,22 +188,17 @@
 
         rastgeleHavuzKonumu();
 
-        // --- atlaAnimasyonunuBaslat Fonksiyonu ---
         function atlaAnimasyonunuBaslat(kullaniciAdi = 'Bilinmeyen', emojiId = null) {
             const aktifKarakterSayisi = document.querySelectorAll('.karakter').length;
             if (aktifKarakterSayisi > 6) {
                 console.log(`⚠️ OBS optimizasyonu: Çok fazla aktif karakter (${aktifKarakterSayisi}), yeni atlama reddediliyor`);
                 return;
             }
-
             if (!havuzGizli && atlayanKullanicilar.has(kullaniciAdi) && !topluAtlamaAktif) {
                 console.log(`Bloklandi: ${kullaniciAdi} zaten atladi.`);
                 return;
             }
-
-            if (havuzGizli) {
-                rastgeleHavuzKonumu();
-            }
+            if (havuzGizli) { rastgeleHavuzKonumu(); }
             atlayanKullanicilar.add(kullaniciAdi);
 
             if (atlamaSesi) {
@@ -239,9 +208,7 @@
                 atlamaSesi.play().catch(error => { console.warn("Ses oynatılamadı:", error); });
             }
 
-            if (havuzGizlemeTimer) {
-                clearTimeout(havuzGizlemeTimer);
-            }
+            if (havuzGizlemeTimer) { clearTimeout(havuzGizlemeTimer); }
             havuzGizlemeTimer = setTimeout(() => {
                 havuz.style.opacity = '0';
                 havuzGizli = true;
@@ -249,31 +216,30 @@
             }, 30000);
 
             const karakter = document.createElement('div');
-            karakter.className = 'karakter'; // CSS'teki .karakter sınıfını kullanır
+            karakter.className = 'karakter';
             console.log(`🎨 Karakter elementi oluşturuldu: ${kullaniciAdi}`);
 
-            // --- KARAKTER SEÇİMİ (GRUP KONTROLÜ) ---
             let karakterGenisligi;
             let karakterYuksekligi;
             const emojiUrl = emojiId ? `https://files.kick.com/emotes/${emojiId}/fullsize` : null;
             let karakterBulundu = false;
             const normalizedUsername = kullaniciAdi.toLowerCase();
 
-            // --- YENİ: Şike Tespiti ---
+            // --- YENİ: 3 Sekmeli Şike Tespiti ---
             const isSwitowski = normalizedUsername === 'switowski';
-            let cheatBounceTarget = 0; // Hedef sekme sayısı
-            if (isSwitowski) {
-                cheatBounceTarget = Math.floor(Math.random() * 4) + 1; // 1 ile 4 arası
-                console.log(`✨ BİLARDO SİSTEMİ AKTİF: ${kullaniciAdi} için hedef ${cheatBounceTarget} sekme!`);
-            }
+            let cheatMode = 'none';
+            let cheatTargetWallX = 0; // Hedef duvarın X koordinatı
+            const cheatBounceTarget = 3; // İstenen sekme sayısı
+            let cheatBounceCount = 0;
             // --- BİTTİ ---
 
-            // --- GÜNCELLENDİ: Şike kontrolü eklendi ---
             if (isSwitowski) {
-                karakter.style.backgroundImage = "url('karakter.svg'), url('karakter.png')"; // Veya özel bir 'switowski.png'
+                karakter.style.backgroundImage = "url('karakter.svg'), url('karakter.png')";
                 karakterGenisligi = Math.round(90 * ortalamaOran);
                 karakterYuksekligi = Math.round(108 * ortalamaOran);
                 karakterBulundu = true;
+                cheatMode = 'aimingForWall'; // Faz 1'i başlat
+                console.log(`✨ 3 SEKMELİ ŞİKE AKTİF: Faz 1 - Duvar hedefleniyor... (Hedef: ${cheatBounceTarget} sekme)`);
             } else if (normalizedUsername === 'pairaaa') {
                 karakter.style.backgroundImage = "url('pairaaa.svg'), url('pairaaa.png')";
                 karakterGenisligi = Math.round(90 * ortalamaOran);
@@ -287,7 +253,6 @@
                 console.log(`🌟 ${kullaniciAdi} - Özel karakter kullanılıyor!`);
                 karakterBulundu = true;
             }
-            // --- GÜNCELLEME SONU ---
 
             if (!karakterBulundu) {
                 for (const grup of Object.values(AYARLAR.ozelKarakterGruplari)) {
@@ -302,7 +267,6 @@
                     }
                 }
             }
-
             if (!karakterBulundu && emojiUrl) {
                 karakter.style.backgroundImage = `url('${emojiUrl}')`;
                 karakterGenisligi = Math.round(80 * ortalamaOran);
@@ -310,23 +274,19 @@
                 console.log(`🎨 ${kullaniciAdi} - Emoji karakteri kullanılıyor: ${emojiId}`);
                 karakterBulundu = true;
             }
-
             if (!karakterBulundu) {
                 karakter.style.backgroundImage = "url('karakter.svg'), url('karakter.png')";
                 karakterGenisligi = Math.round(90 * ortalamaOran);
                 karakterYuksekligi = Math.round(108 * ortalamaOran);
             }
-            // --- KARAKTER SEÇİMİ SONU ---
-
 
             karakter.style.width = karakterGenisligi + 'px';
             karakter.style.height = karakterYuksekligi + 'px';
             karakter.style.backgroundSize = karakterGenisligi + 'px ' + karakterYuksekligi + 'px';
-
             karakter.style.backgroundRepeat = 'no-repeat';
             karakter.style.backgroundPosition = 'center';
             karakter.style.position = 'absolute';
-            karakter.style.zIndex = '20'; 
+            karakter.style.zIndex = '20';
             karakter.style.opacity = '1';
             karakter.style.willChange = 'transform, left, top';
             karakter.style.transform = 'translateZ(0)';
@@ -342,7 +302,7 @@
             kullaniciEtiketi.style.fontSize = '16px';
             kullaniciEtiketi.style.fontWeight = '400';
             kullaniciEtiketi.style.fontFamily = "'Roboto', sans-serif";
-            kullaniciEtiketi.style.zIndex = '11'; 
+            kullaniciEtiketi.style.zIndex = '11';
             kullaniciEtiketi.style.pointerEvents = 'none';
             kullaniciEtiketi.style.textAlign = 'center';
             kullaniciEtiketi.style.width = Math.round(80 * ortalamaOran) + 'px';
@@ -361,13 +321,14 @@
             let yon = Math.random() > 0.5 ? 1 : -1;
             const minAci = AYARLAR.fizik.minimumAci;
             const maxAci = AYARLAR.fizik.maksimumAci;
-            let rastgeleTemelAci = (Math.random() * (maxAci - minAci)) + minAci; 
-            let rastgeleAci = rastgeleTemelAci * yon; 
-            let baslangicHiz = (AYARLAR.fizik.temelHiz + Math.random() * AYARLAR.fizik.hizVaryasyon) * ortalamaOran; 
+            let rastgeleTemelAci = (Math.random() * (maxAci - minAci)) + minAci;
+            let baslangicHiz = (AYARLAR.fizik.temelHiz + Math.random() * AYARLAR.fizik.hizVaryasyon) * ortalamaOran;
             const yerCekimi = AYARLAR.fizik.yerCekimi * ortalamaOran;
             const minIvme = AYARLAR.fizik.minimumIvme || 0.01;
             const maxIvme = AYARLAR.fizik.maksimumIvme || 0.05;
-            const yatayIvmeMiktari = (Math.random() * (maxIvme - minAci) + minAci) * ortalamaOran; // --- GÜNCELLENDİ (Hata düzeltmesi minIvme olacak)
+            
+            const yatayIvmeMiktari = isSwitowski ? 0 : (Math.random() * (maxIvme - minIvme) + minIvme) * ortalamaOran;
+
             const maksimumYatayHiz = 18.0 * ortalamaOran;
             const maksimumDikeyHiz = 6.0 * ortalamaOran;
             const guvenliKarakterMargin = Math.round(20 * ortalamaOran);
@@ -376,18 +337,26 @@
             const baslangicX = Math.random() * (maxX - minX) + minX;
             let x = baslangicX;
             let y = -karakterYuksekligi;
-            
-            // --- GÜNCELLENDİ: Şike Fizik Ayarlaması ---
-            // Sekmeyi teşvik etmek için daha yatay ve hızlı fırlat
+
+            // --- GÜNCELLENDİ: Şike Başlangıç Fiziği ---
             if (isSwitowski) {
-                console.log('✨ BİLARDO FİZİKLERİ: Hız ve yatay açı artırılıyor.');
+                // Duvara ulaşması için daha hızlı ve yatay fırlat
                 baslangicHiz = (AYARLAR.fizik.temelHiz + AYARLAR.fizik.hizVaryasyon) * ortalamaOran * 1.5; // %50 daha hızlı
-                rastgeleTemelAci = (Math.random() * (45 - 30)) + 30; // 30-45 derece arası
-                yon = (x > ekranGenisligi / 2) ? -1 : 1; // En yakın duvara doğru değil, UZAKTAKİ duvara doğru (daha iyi)
-                rastgeleAci = rastgeleTemelAci * yon;
+                rastgeleTemelAci = (Math.random() * (45 - 30)) + 30; // 30-45 derece (daha yatay)
+                
+                // En uzak duvarı hedefle
+                if (x > ekranGenisligi / 2) { // Sağda doğdu, solu hedefle
+                    yon = -1;
+                    cheatTargetWallX = 0;
+                } else { // Solda doğdu, sağı hedefle
+                    yon = 1;
+                    cheatTargetWallX = ekranGenisligi - karakterGenisligi;
+                }
+                console.log(`✨ FAZ 1: Hedef duvar X=${cheatTargetWallX}`);
             }
             // --- BİTTİ ---
 
+            let rastgeleAci = rastgeleTemelAci * yon;
             let vx = Math.sin(rastgeleAci * Math.PI / 180) * baslangicHiz;
             let vy = (Math.abs(Math.cos(rastgeleAci * Math.PI / 180) * baslangicHiz));
 
@@ -395,29 +364,26 @@
             karakter.style.transform = `translate3d(${x}px, ${y}px, 0)`;
             kullaniciEtiketi.style.transform = `translate3d(${x + karakterGenisligi/2}px, ${y - 20 * ortalamaOran}px, 0) translateX(-50%)`;
             
-            // --- GÜNCELLENDİ: Şike bayrakları eklendi ---
+            // --- YENİ: Şike Sayaçları ---
             karakterPozisyonlari.set(kullaniciAdi, {
                 x: x, y: y, vx: vx, vy: vy,
                 yatayIvme: yatayIvmeMiktari,
                 karakter: karakter, kullaniciEtiketi: kullaniciEtiketi,
                 sonCarpismaZamani: 0,
                 sonCarpismaKullanici: null,
-                isSwitowski: isSwitowski, 
-                cheatMode: isSwitowski ? 'bouncing' : 'none', // 'bouncing' (sekme sayar) -> 'guiding' (güdümlü)
-                cheatBounceTarget: cheatBounceTarget, // Hedef sekme (örn: 3)
-                cheatBounceCount: 0 // Mevcut sekme
+                isSwitowski: isSwitowski,
+                cheatMode: cheatMode, // 'aimingForWall' veya 'guidingToPool'
+                cheatTargetWallX: cheatTargetWallX, // Hedef duvarın X'i
+                cheatBounceTarget: cheatBounceTarget, // Hedef sekme sayısı (3)
+                cheatBounceCount: cheatBounceCount // Mevcut sekme sayısı (0)
             });
             // --- BİTTİ ---
 
             console.log(`📝 Karakter pozisyonu kaydedildi: ${kullaniciAdi}`);
 
-            // --- Animasyon Döngüsü (requestAnimationFrame) ---
             let sonFrameZamani = 0;
             const hedefFPS = 60;
             const frameSuresi = 1000 / hedefFPS;
-
-            // --- YENİ: Sekme sonrası gecikme bayrağı ---
-            let duvardanYeniSekti = false; 
 
             const animasyon = (mevcutZaman) => {
                 if (mevcutZaman - sonFrameZamani < frameSuresi) {
@@ -432,141 +398,168 @@
 
                 let { x, y, vx, vy } = mevcutPozisyon;
                 const deltaTime = 1.0;
-                vy += yerCekimi * deltaTime;
                 
-                // --- GÜNCELLENDİ: İvme, sadece güdüm modunda *değilse* uygulanır ---
-                if (mevcutPozisyon.cheatMode !== 'guiding') {
+                // --- DÜZELTİLDİ: Fizik Çekirdeği (3 SEKMELİ SİSTEM) ---
+
+                // 1. Dikey Hız (Yerçekimi HER ZAMAN aktif)
+                vy += yerCekimi * deltaTime;
+
+                // 2. Yatay Hız (Şike veya Normal Fizik)
+                if (mevcutPozisyon.isSwitowski) {
+                    // --- FAZLI YÖRÜNGE BÜKÜCÜ ---
+                    let targetX;
+                    
+                    if (mevcutPozisyon.cheatMode === 'aimingForWall') {
+                        // Faz 1: Hedefimiz mevcut hedef duvar
+                        targetX = mevcutPozisyon.cheatTargetWallX;
+                    } else {
+                        // Faz 2: Hedefimiz havuzun merkezi
+                        const havuzLeft = parseInt(havuz.style.left) || 0;
+                        const havuzWidth = parseInt(havuz.style.width) || 298;
+                        targetX = (havuzLeft + havuzWidth / 2) - (karakterGenisligi / 2);
+                    }
+
+                    // --- Akıllı Yönlendirme (Her iki fazda da çalışır) ---
+                    const guncelYukseklik_Anim = Math.max(window.innerHeight, document.documentElement.clientHeight) || 1080;
+                    const distance = targetX - x;
+                    const remainingY = (guncelYukseklik_Anim - karakterYuksekligi) - y;
+
+                    if (remainingY > 50) { // Yere çok yakın değilse
+                        const timeToImpact = (remainingY / (vy + 0.001)) || 0.1;
+                        let ideal_vx = distance / (timeToImpact + 0.001);
+
+                        // Yumuşatma faktörü (%15). Ani eğim değişikliğini engeller.
+                        vx = (vx * 0.85) + (ideal_vx * 0.15);
+                    }
+                    // --- BİTTİ ---
+
+                } else {
+                    // --- NORMAL FİZİK ---
                     const ivme = mevcutPozisyon.yatayIvme || 0;
                     if (vx > 0) { vx += ivme * deltaTime; } else if (vx < 0) { vx -= ivme * deltaTime; }
                 }
-                // --- BİTTİ ---
 
+                // 3. Hızları Uygula
                 x += vx * deltaTime;
                 y += vy * deltaTime;
+                
+                // 4. Hızları Sınırla
                 const sinirliHiz = hizSinirla(vx, vy, maksimumYatayHiz, maksimumDikeyHiz);
                 vx = sinirliHiz.vx;
                 vy = sinirliHiz.vy;
 
-                // --- GÜNCELLENDİ: Duvar Sekme Mantığı (Şike Desteği ile) ---
-                let duvaraCarpti = false;
-                
-                if (x <= 0) { // Sol duvar
+                // 5. Duvar Sekmesi (Tüm karakterler için)
+                let bounced = false;
+                if (x <= 0) {
                     vx = Math.abs(vx); // Her zaman sağa sek
                     x = 0;
-                    duvaraCarpti = true;
-                } else if (x + karakterGenisligi >= ekranGenisligi) { // Sağ duvar
+                    bounced = true;
+                } else if (x + karakterGenisligi >= ekranGenisligi) {
                     vx = -Math.abs(vx); // Her zaman sola sek
                     x = ekranGenisligi - karakterGenisligi;
-                    duvaraCarpti = true;
+                    bounced = true;
                 }
 
-                // --- YENİ: Şike Sekme Sayacı ---
-                if (duvaraCarpti && !duvardanYeniSekti) { // Sadece bir kez tetiklenmesi için
-                    if (mevcutPozisyon.isSwitowski && mevcutPozisyon.cheatMode === 'bouncing') {
-                        mevcutPozisyon.cheatBounceCount++;
-                        console.log(`✨ BİLARDO: Sekme ${mevcutPozisyon.cheatBounceCount} / ${mevcutPozisyon.cheatBounceTarget}`);
+                // 6. Sekme Sonrası Ayarlama (ŞİKE SAYACI BURADA)
+                if (bounced) {
+                    if (mevcutPozisyon.isSwitowski) {
                         
-                        if (mevcutPozisyon.cheatBounceCount >= mevcutPozisyon.cheatBounceTarget) {
-                            mevcutPozisyon.cheatMode = 'guiding';
-                            console.log('🎯 GÜDÜMLÜ MOD AKTİF! Havuz hedefleniyor.');
+                        if (mevcutPozisyon.cheatMode === 'aimingForWall') {
+                            mevcutPozisyon.cheatBounceCount++;
+                            console.log(`✨ 3 SEKMELİ ŞİKE: Sekme ${mevcutPozisyon.cheatBounceCount} / ${mevcutPozisyon.cheatBounceTarget}`);
+
+                            // Hedef sayısına ulaştık mı?
+                            if (mevcutPozisyon.cheatBounceCount >= mevcutPozisyon.cheatBounceTarget) {
+                                // Evet: Faz 2'ye geç
+                                mevcutPozisyon.cheatMode = 'guidingToPool';
+                                console.log('✨ FAZ 2: Hedef sekme sayısına ulaşıldı! Havuz hedefleniyor.');
+                            } else {
+                                // Hayır: Karşı duvarı hedefle
+                                if (x === 0) { // Sol duvara çarptı, sağı hedefle
+                                    mevcutPozisyon.cheatTargetWallX = ekranGenisligi - karakterGenisligi;
+                                } else { // Sağ duvara çarptı, solu hedefle
+                                    mevcutPozisyon.cheatTargetWallX = 0;
+                                }
+                                console.log(`✨ FAZ 1: Yeni hedef duvar X=${mevcutPozisyon.cheatTargetWallX}`);
+                            }
+                        }
+                        
+                        // Şike sekmesi (hafifçe daha hızlı, "havalı" görünmesi için)
+                        vx *= 1.1; 
+                    } else {
+                        // Normal rastgele sekme
+                        const rastgeleSekmeKatsayisi = Math.random() * (1.20 - 0.95) + 0.95;
+                        vx *= rastgeleSekmeKatsayisi;
+                    }
+                }
+                // --- FİZİK ÇEKİRDEĞİ SONU ---
+
+
+                // 7. Çarpışma Tespiti (Switowski hariç)
+                if (!mevcutPozisyon.isSwitowski) {
+                    const carpismaSonucu = karakterCarpismaTespiti(kullaniciAdi, x, y, karakterGenisligi, karakterYuksekligi);
+                    if (carpismaSonucu.carpisma) {
+                        // ... (Çarpışma kodu - değişiklik yok) ...
+                        const digerPozisyon = carpismaSonucu.digerPozisyon;
+                        const digerKullanici = carpismaSonucu.digerKullanici;
+                        const cooldownBitti = (mevcutPozisyon.sonCarpismaKullanici !== digerKullanici) || (mevcutZaman - mevcutPozisyon.sonCarpismaZamani > 500);
+                        if (cooldownBitti && digerPozisyon) {
+                            const benimMerkezX = x + karakterGenisligi / 2;
+                            const digerMerkezX = digerPozisyon.x + karakterGenisligi / 2;
+                            const benimMerkezY = y + karakterYuksekligi / 2;
+                            const digerMerkezY = digerPozisyon.y + karakterYuksekligi / 2;
+                            const farkX = benimMerkezX - digerMerkezX;
+                            const farkY = benimMerkezY - digerMerkezY;
+                            const toplamYariGenislik = (karakterGenisligi / 2) + (digerPozisyon.karakter.clientWidth / 2);
+                            const toplamYariYukseklik = (karakterYuksekligi / 2) + (digerPozisyon.karakter.clientHeight / 2);
+                            const overlapX = toplamYariGenislik - Math.abs(farkX);
+                            const overlapY = toplamYariYukseklik - Math.abs(farkY);
+                            if (overlapX < overlapY) {
+                                const benimEskiVx = vx;
+                                vx = digerPozisyon.vx;
+                                digerPozisyon.vx = benimEskiVx;
+                                const itmeMiktari = overlapX + 0.1;
+                                if (farkX > 0) { x += itmeMiktari; } else { x -= itmeMiktari; }
+                            } else {
+                                const benimEskiVy = vy;
+                                vy = digerPozisyon.vy;
+                                digerPozisyon.vy = benimEskiVy;
+                                const itmeMiktari = overlapY + 0.1;
+                                if (farkY > 0) { y += itmeMiktari; } else { y -= itmeMiktari; }
+                            }
+                            mevcutPozisyon.sonCarpismaZamani = mevcutZaman;
+                            mevcutPozisyon.sonCarpismaKullanici = digerKullanici;
+                            digerPozisyon.sonCarpismaZamani = mevcutZaman;
+                            digerPozisyon.sonCarpismaKullanici = kullaniciAdi;
+                            const digerSinirliHiz = hizSinirla(digerPozisyon.vx, digerPozisyon.vy, maksimumYatayHiz, maksimumDikeyHiz);
+                            digerPozisyon.vx = digerSinirliHiz.vx;
+                            digerPozisyon.vy = digerSinirliHiz.vy;
                         }
                     }
-                    
-                    // Normal sekme fiziği (Şike modu 'guiding' DEĞİLSE)
-                    if (mevcutPozisyon.cheatMode !== 'guiding') { 
-                         const rastgeleSekmeKatsayisi = Math.random() * (1.20 - 0.95) + 0.95;
-                         vx *= rastgeleSekmeKatsayisi;
-                    }
-                    
-                    duvardanYeniSekti = true; // Bu frame'de sekti
-                } else if (!duvaraCarpti) {
-                    duvardanYeniSekti = false; // Duvardan uzaklaştı, bayrağı sıfırla
                 }
-                // --- BİTTİ ---
-
-                // --- YENİ: Şike Güdüm Mantığı ('guiding' mod aktifse) ---
-                if (mevcutPozisyon.isSwitowski && mevcutPozisyon.cheatMode === 'guiding') {
-                    const guncelYukseklik_Anim = Math.max(window.innerHeight, document.documentElement.clientHeight) || 1080;
-                    const havuzLeft = parseInt(havuz.style.left) || 0;
-                    const havuzWidth = parseInt(havuz.style.width) || 298;
-                    const targetX = (havuzLeft + havuzWidth / 2) - (karakterGenisligi / 2); // Hedef X
-                    
-                    const distance = targetX - x; // Hedefe olan yatay mesafe
-                    const remainingY = (guncelYukseklik_Anim - karakterYuksekligi) - y; // Yere kalan dikey mesafe
-
-                    if (remainingY > 50) { // Yere çok yakın değilse
-                        // Agresif nişan alma katsayısı (2.0)
-                        // Kalan mesafeye (Y) bölerek, yaklaştıkça daha hızlı düzeltme yapmasını sağlar
-                        // vy ile çarpmak, hızı korur
-                        let ideal_vx = (distance / remainingY) * (vy * 2.0); 
-                        
-                        // Hızı yavaşça ayarla (daha doğal görünüm için)
-                        vx = vx * 0.95 + ideal_vx * 0.05; 
-                    }
-                    
-                    const hizSinirliGudum = hizSinirla(vx, vy, maksimumYatayHiz, maksimumDikeyHiz);
-                    vx = hizSinirliGudum.vx;
-                }
-                // --- ŞİKE MANTIĞI SONU ---
-
-
-                const carpismaSonucu = karakterCarpismaTespiti(kullaniciAdi, x, y, karakterGenisligi, karakterYuksekligi);
-                if (carpismaSonucu.carpisma && mevcutPozisyon.cheatMode !== 'guiding') { // --- GÜNCELLENDİ: Güdümlü modda çarpışma olmaz
-                    const digerPozisyon = carpismaSonucu.digerPozisyon;
-                    const digerKullanici = carpismaSonucu.digerKullanici;
-                    const cooldownBitti = (mevcutPozisyon.sonCarpismaKullanici !== digerKullanici) || (mevcutZaman - mevcutPozisyon.sonCarpismaZamani > 500);
-                    if (cooldownBitti && digerPozisyon) {
-                        const benimMerkezX = x + karakterGenisligi / 2;
-                        const digerMerkezX = digerPozisyon.x + karakterGenisligi / 2;
-                        const benimMerkezY = y + karakterYuksekligi / 2;
-                        const digerMerkezY = digerPozisyon.y + karakterYuksekligi / 2;
-                        const farkX = benimMerkezX - digerMerkezX;
-                        const farkY = benimMerkezY - digerMerkezY;
-                        const toplamYariGenislik = (karakterGenisligi / 2) + (digerPozisyon.karakter.clientWidth / 2);
-                        const toplamYariYukseklik = (karakterYuksekligi / 2) + (digerPozisyon.karakter.clientHeight / 2);
-                        const overlapX = toplamYariGenislik - Math.abs(farkX);
-                        const overlapY = toplamYariYukseklik - Math.abs(farkY);
-                        if (overlapX < overlapY) {
-                            const benimEskiVx = vx;
-                            vx = digerPozisyon.vx;
-                            digerPozisyon.vx = benimEskiVx;
-                            const itmeMiktari = overlapX + 0.1;
-                            if (farkX > 0) { x += itmeMiktari; } else { x -= itmeMiktari; }
-                        } else {
-                            const benimEskiVy = vy;
-                            vy = digerPozisyon.vy;
-                            digerPozisyon.vy = benimEskiVy;
-                            const itmeMiktari = overlapY + 0.1;
-                            if (farkY > 0) { y += itmeMiktari; } else { y -= itmeMiktari; }
-                        }
-                        mevcutPozisyon.sonCarpismaZamani = mevcutZaman;
-                        mevcutPozisyon.sonCarpismaKullanici = digerKullanici;
-                        digerPozisyon.sonCarpismaZamani = mevcutZaman;
-                        digerPozisyon.sonCarpismaKullanici = kullaniciAdi;
-                        const digerSinirliHiz = hizSinirla(digerPozisyon.vx, digerPozisyon.vy, maksimumYatayHiz, maksimumDikeyHiz);
-                        digerPozisyon.vx = digerSinirliHiz.vx;
-                        digerPozisyon.vy = digerSinirliHiz.vy;
-                    }
-                }
+                
+                // 8. Pozisyonu Güncelle
                 mevcutPozisyon.x = x;
                 mevcutPozisyon.y = y;
                 mevcutPozisyon.vx = vx;
                 mevcutPozisyon.vy = vy;
                 karakter.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
                 kullaniciEtiketi.style.transform = `translate3d(${Math.round(x + karakterGenisligi/2)}px, ${Math.round(y - 20 * ortalamaOran)}px, 0) translateX(-50%)`;
-                const guncelYukseklik = Math.max(window.innerHeight, document.documentElement.clientHeight) || 1080;
                 
-                // --- GÜNCELLENDİ: İniş Mantığı (Şike Desteği ile) ---
+                // 9. İniş Tespiti
+                const guncelYukseklik = Math.max(window.innerHeight, document.documentElement.clientHeight) || 1080;
                 if (y + karakterYuksekligi >= guncelYukseklik) {
                     
                     let basariliAtlayis = false;
             
-                    // --- YENİ: Şike İniş Mantığı ---
-                    if (mevcutPozisyon.isSwitowski && mevcutPozisyon.cheatMode === 'guiding') {
-                        console.log('✨ BİLARDO TAMAMLANDI: Switowski havuzun ortasına indi!');
+                    // --- DÜZELTİLDİ: Şike İniş Mantığı ---
+                    // Sadece Faz 2'ye geçtiyse (yani 3 sekme olduysa) puan ver
+                    if (mevcutPozisyon.isSwitowski && mevcutPozisyon.cheatMode === 'guidingToPool') {
+                        console.log('✨ 3 SEKMELİ ŞİKE TAMAMLANDI: Switowski havuzun ortasına indi!');
                         const havuzLeft = parseInt(havuz.style.left) || 0;
                         const havuzWidth = parseInt(havuz.style.width) || 298;
-                        x = (havuzLeft + havuzWidth / 2) - (karakterGenisligi / 2); // Tam merkeze zorla
+                        const hedefX = (havuzLeft + havuzWidth / 2) - (karakterGenisligi / 2); // Tam merkez
+                        x = hedefX; // Tam merkeze zorla (Snap)
                         y = guncelYukseklik - karakterYuksekligi;
                         
                         karakter.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
@@ -587,7 +580,7 @@
                             console.log(`🎉 YENİ REKOR! ${kullaniciAdi}: ${puan} puan`);
                         }
                     } 
-                    // --- Normal İniş Mantığı ---
+                    // --- Normal İniş Mantığı (veya başarısız şike) ---
                     else {
                         y = guncelYukseklik - karakterYuksekligi;
                         karakter.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
@@ -597,6 +590,10 @@
                         mevcutPozisyon.vx = vx;
                         mevcutPozisyon.vy = vy;
                         
+                        if (mevcutPozisyon.isSwitowski) { // Eğer Faz 1'deyken yere çarptıysa (3 sekmeyi tamamlayamadıysa)
+                             console.log(`💥 3 SEKMELİ ŞİKE BAŞARISIZ! (Sadece ${mevcutPozisyon.cheatBounceCount} sekme yapabildi)`);
+                        }
+
                         if (!havuzGizli) {
                             const karakterMerkez = x + karakterGenisligi / 2;
                             const havuzLeft = parseInt(havuz.style.left) || 0;
@@ -609,7 +606,7 @@
                                 basariliAtlayis = true;
                                 const puan = Math.max(0, Math.min(100, Math.round((basariMesafeSiniri - mesafe) / puanlamaKatsayisi)));
                                 console.log(`🏆 HAVUZ TUTTURULDU! ${kullaniciAdi} - Puan: ${puan}, Mesafe: ${mesafe.toFixed(1)}`);
-                                if (puan > enYuksekSkor) {
+                                if (puan > enYuksekSkor && !mevcutPozisyon.isSwitowski) { // Şike rekor sayılmaz
                                     enYuksekSkor = puan;
                                     enYuksekSkorKullanici = kullaniciAdi;
                                     skorGosterici.textContent = `En Yüksek Skor: ${kullaniciAdi} - ${puan.toFixed(1)}/100`;
@@ -636,8 +633,6 @@
                     }, beklemeSuresi);
                     return; // Animasyon döngüsünü bitir
                 }
-                // --- İNİŞ MANTIĞI SONU ---
-
                 requestAnimationFrame(animasyon);
             };
             requestAnimationFrame(animasyon);
@@ -653,9 +648,8 @@
         function karakterCarpismaTespiti(mevcutKullanici, x, y, karakterGenisligi, karakterYuksekligi) {
             for (const [kullaniciAdi, pozisyon] of karakterPozisyonlari) {
                 if (kullaniciAdi === mevcutKullanici) continue;
-                // --- YENİ: Şike moduysa çarpışma olmaz ---
-                if (pozisyon.isSwitowski) continue; 
-                // --- BİTTİ ---
+                if (pozisyon.isSwitowski) continue; // Switowski'ye kimse çarpamaz
+                
                 const digerX = pozisyon.x;
                 const digerY = pozisyon.y;
                 const digerGenislik = pozisyon.karakter.clientWidth;
@@ -672,9 +666,8 @@
         }
 
         function skorBildirimiGoster(kullaniciAdi, skor) {
-            // (Bu fonksiyon şu an kullanılmıyor ama ileride lazım olabilir)
+            // (Kullanılmıyor)
         }
-
 
         // =================================================================
         // <<< KICK CHAT BAĞLANTISI (MANUEL ID) >>>
@@ -705,20 +698,16 @@
             ws.onmessage = (event) => {
                 try {
                     const eventData = JSON.parse(event.data);
-
                     if (eventData.event === 'pusher:ping') {
                         ws.send(JSON.stringify({ event: 'pusher:pong' }));
                         return;
                     }
-
                     if (eventData.event === 'App\\Events\\ChatMessageEvent') {
                         const chatMessage = JSON.parse(eventData.data);
-
                         const username = chatMessage.sender?.username || 'Bilinmeyen';
                         const normalizedUsername = username.toLowerCase();
                         const content = (chatMessage.content || '').trim();
                         const cleanContent = content.toLowerCase();
-
                         const isYetkili = AYARLAR.yetkiliListesi.includes(normalizedUsername);
 
                         if (isYetkili) {
@@ -728,7 +717,6 @@
                                 console.warn("🟢 TOPLU ATLAMA MODU AÇIK! '!atla' komutları sıraya alınıyor.");
                                 return;
                             }
-
                             if (cleanContent === '!atlat') {
                                 if (atlamaSirasi.length === 0) {
                                     console.warn("🟡 '!atlat' komutu alındı ama sıra boş.");
@@ -777,7 +765,6 @@
         function ekranBoyutlariniGuncelle() {
             const yeniGenislik = Math.max(window.innerWidth, document.documentElement.clientWidth) || 1920;
             const yeniYukseklik = Math.max(window.innerHeight, document.documentElement.clientHeight) || 1080;
-            
             if (yeniGenislik !== ekranGenisligi || yeniYukseklik !== ekranYuksekligi) {
                 console.log(`📏 Ekran boyutu değişti: ${yeniGenislik}x${yeniYukseklik}`);
                 ekranGenisligi = yeniGenislik;
@@ -792,7 +779,7 @@
         };
         // --- YENİ: Şike testi için özel fonksiyon ---
         window.testSike = function() {
-            console.log(`🧪 Manuel BİLARDO testi: switowski`);
+            console.log(`🧪 Manuel 3 SEKMELİ ŞİKE testi: switowski`);
             atlaAnimasyonunuBaslat('switowski', null);
         };
         // --- BİTTİ ---
